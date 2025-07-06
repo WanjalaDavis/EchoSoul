@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "echosoul_backend": {
+      "main": "src/echosoul_backend/main.mo",
+      "type": "motoko"
+    },
+    "echosoul_frontend": {
+      "dependencies": [
+        "echosoul_backend"
+      ],
+      "source": [
+        "src/echosoul_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "echosoul_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
