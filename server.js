@@ -2,53 +2,47 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import fetch from "node-fetch";
+import dotenv from "dotenv";
+
+// ✅ Load .env variables
+dotenv.config();
 
 const app = express();
 const PORT = 3001;
 
-// Middleware
+// ✅ Get API Key from environment
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
+if (!OPENROUTER_API_KEY) {
+  console.warn("⚠️ Missing OPENROUTER_API_KEY in .env. AI chat won't work.");
+} else {
+  console.log(`🔐 OpenRouter API key loaded: ${OPENROUTER_API_KEY.slice(0, 15)}...`);
+}
+
+// ====== Middleware ======
 app.use(cors());
 app.use(bodyParser.json());
 
-// Personal system prompt
+// ====== System Prompt ======
 const systemPrompt = `
-You are EchoSoul, a deeply personal AI assistant that reflects on a user’s memories, thoughts, and emotions.
-Your purpose is to help the user understand themselves through reflection.
+You are EchoSoul, a personal AI companion that helps users reflect on their thoughts and emotions.
 
-Instructions:
-- Always relate your answers to the user’s memories.
-- Be specific. Avoid generic advice.
-- If memories mention stress, joy, or doubt, respond with empathy and personal insight.
-- If you don't have enough information, say: “I don’t remember enough about that yet. Could you tell me more?”
-`;
+You don't have access to user memories — rely only on the current conversation to guide your responses.
 
-// 🧠 Route to handle chat requests
+Be empathetic, brief, and insightful.
+
+If you don’t have enough context to answer, say:
+"I’m still learning about you. Could you tell me more?"
+`.trim();
+
+// ====== Chat Endpoint ======
 app.post("/api/chat", async (req, res) => {
-  const { messages, principal } = req.body;
+  const { messages } = req.body;
 
   console.log("🧠 Incoming messages:", messages);
-  console.log("🔑 Principal:", principal);
-
-  // 🧠 Fetch latest memories from Motoko canister
-  let memorySummary = "The user has no stored memories yet.";
-  try {
-    const motokoRes = await fetch(`http://localhost:4943/api/v1/memories/${principal}`);
-    const userMemories = await motokoRes.json();
-
-    if (Array.isArray(userMemories) && userMemories.length > 0) {
-      const memoryTexts = userMemories
-        .map((m) => `- "${m.text}"`)
-        .slice(-5)
-        .join("\n");
-      memorySummary = `Here are some of the user's recent memories:\n${memoryTexts}`;
-    }
-  } catch (error) {
-    console.error("🛑 Failed to fetch memories from Motoko:", error.message);
-  }
 
   const fullMessages = [
     { role: "system", content: systemPrompt },
-    { role: "user", content: memorySummary },
     ...messages,
   ];
 
@@ -57,19 +51,24 @@ app.post("/api/chat", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer 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"
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3-8b-instruct", // ✅ free model
+        model: "meta-llama/llama-3-8b-instruct", // ✅ Free model
         messages: fullMessages,
-        temperature: 0.7
-      })
+        temperature: 0.7,
+      }),
     });
 
     const data = await response.json();
     console.log("🔍 OpenRouter response:", data);
 
-    if (!data.choices || !data.choices[0]) {
+    if (data?.error) {
+      console.error("❌ API Error:", data.error.message);
+      return res.status(500).json({ error: data.error.message });
+    }
+
+    if (!data.choices || !data.choices[0]?.message?.content) {
       return res.status(500).json({ error: "Invalid response from OpenRouter." });
     }
 
@@ -77,12 +76,12 @@ app.post("/api/chat", async (req, res) => {
     res.json({ reply });
 
   } catch (error) {
-    console.error("🔥 OpenRouter error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("🔥 OpenRouter fetch error:", error);
+    res.status(500).json({ error: "Server failed to fetch AI response." });
   }
 });
 
-// Start server
+// ====== Start Server ======
 app.listen(PORT, () => {
   console.log(`✅ EchoSoul AI server running at http://localhost:${PORT}`);
 });

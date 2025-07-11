@@ -8,11 +8,12 @@
   <meta name="description" content="EchoSoul – Preserve your digital memories and connect with your digital self." />
   <meta name="keywords" content="EchoSoul, AI memory, digital self, ICP, blockchain, Motoko, Internet Computer" />
   <meta name="author" content="EchoSoul Team" />
-  <meta name="theme-color" content="#0d6efd" />
+  <meta name="theme-color" content="#5e35b1" />
 
-  <!-- Title & Favicon -->
-  <title>EchoSoul – Preserve Your Digital Consciousness</title>
+  <!-- Favicon -->
   <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+ 
 
   <!-- Open Graph (social sharing) -->
   <meta property="og:title" content="EchoSoul" />
@@ -21,10 +22,549 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://your-domain.icp0.io" />
 
-  <!-- Fonts & Styles (optional) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- CSS -->
+  <style>
+    /* ====== Base Styles & Variables ====== */
+:root {
+  /* Next-Gen Color Palette */
+  --primary: #6e48aa;
+  --primary-light: #9d50bb;
+  --primary-dark: #4a2d7a;
+  --secondary: #4776e6;
+  --secondary-dark: #2c56c4;
+  --accent: #ff8a5c;
+  --accent-dark: #e86a3c;
+  --dark: #0f0f1a;
+  --darker: #0a0a12;
+  --light: #f8f9fa;
+  --light-gray: #e9ecef;
+  --gray: #adb5bd;
+  
+  /* Futuristic Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-light));
+  --gradient-secondary: linear-gradient(135deg, var(--secondary), var(--primary-light));
+  --gradient-accent: linear-gradient(135deg, var(--accent), #ff5e62);
+  --gradient-dark: linear-gradient(to right, var(--darker), var(--dark));
+  
+  /* Glassmorphism Effects */
+  --glass-bg: rgba(15, 15, 26, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.05);
+  
+  /* Shadows */
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.25);
+  
+  /* Transitions */
+  --transition-fast: all 0.2s ease;
+  --transition-normal: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+  
+  /* Borders */
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 24px;
+  --border-radius-circle: 50%;
+  
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+}
+
+/* ====== Global Styles ====== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--dark);
+  color: var(--light);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(110, 72, 170, 0.15) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(255, 138, 92, 0.15) 0%, transparent 20%);
+  background-attachment: fixed;
+}
+
+/* ====== Typography ====== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--space-md);
+}
+
+h1 {
+  font-size: 3.5rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-size: 2.5rem;
+  position: relative;
+  display: inline-block;
+  padding-bottom: var(--space-sm);
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: var(--gradient-accent);
+  border-radius: 2px;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
+p {
+  margin-bottom: var(--space-md);
+  color: var(--gray);
+  font-weight: 400;
+}
+
+a {
+  color: var(--light);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+/* ====== Layout Components ====== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+}
+
+.section {
+  padding: var(--space-xxl) 0;
+  position: relative;
+}
+
+/* ====== Header ====== */
+.premium-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: var(--space-md) var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  z-index: 1000;
+  border-bottom: 1px solid var(--glass-border);
+  transition: var(--transition-normal);
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  text-decoration: none;
+  transition: var(--transition-normal);
+}
+
+.logo:hover {
+  transform: scale(1.02);
+}
+
+.logo-icon {
+  font-size: 2rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: var(--transition-normal);
+}
+
+.logo:hover .logo-icon {
+  transform: rotate(15deg);
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.025em;
+}
+
+.nav-links {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: center;
+}
+
+.nav-link {
+  color: var(--light-gray);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  transition: var(--transition-fast);
+  padding: var(--space-sm) 0;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--light);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-accent);
+  transition: var(--transition-normal);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: var(--space-md);
+}
+
+/* ====== Buttons ====== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--border-radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  opacity: 0;
+  transition: var(--transition-fast);
+}
+
+.btn:hover::before {
+  opacity: 1;
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: var(--light);
+  box-shadow: 0 4px 20px rgba(110, 72, 170, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(110, 72, 170, 0.6);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--light);
+  border: 2px solid var(--glass-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-outline::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--gradient-primary);
+  z-index: -1;
+  opacity: 0;
+  transition: var(--transition-normal);
+}
+
+.btn-outline:hover {
+  color: var(--light);
+  border-color: transparent;
+}
+
+.btn-outline:hover::after {
+  opacity: 1;
+}
+
+/* ====== Footer ====== */
+.premium-footer {
+  background: var(--gradient-dark);
+  padding: var(--space-xxl) 0 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==');
+  opacity: 0.1;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-xxl);
+  position: relative;
+  z-index: 1;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.footer-logo-icon {
+  font-size: 2rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.footer-logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.footer-about {
+  max-width: 300px;
+}
+
+.footer-about p {
+  color: var(--gray);
+}
+
+.footer-links h3 {
+  font-size: 1.25rem;
+  margin-bottom: var(--space-lg);
+  position: relative;
+  display: inline-block;
+  color: var(--light);
+}
+
+.footer-links h3::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: var(--gradient-accent);
+  border-radius: 3px;
+}
+
+.footer-links ul {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: var(--space-sm);
+}
+
+.footer-links a {
+  color: var(--gray);
+  text-decoration: none;
+  transition: var(--transition-fast);
+  display: inline-block;
+}
+
+.footer-links a:hover {
+  color: var(--light);
+  transform: translateX(5px);
+}
+
+.footer-social {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-circle);
+  color: var(--light);
+  font-size: 1.25rem;
+  transition: var(--transition-normal);
+}
+
+.social-icon:hover {
+  background: var(--gradient-primary);
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 8px 20px rgba(110, 72, 170, 0.4);
+}
+
+.copyright {
+  text-align: center;
+  padding: var(--space-lg) 0;
+  margin-top: var(--space-xxl);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--gray);
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ====== Browser Warning ====== */
+.browser-warning {
+  display: none;
+  background: rgba(255, 213, 79, 0.2);
+  color: #ffab00;
+  padding: var(--space-md);
+  font-size: 0.9rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 213, 79, 0.3);
+}
+
+/* ====== Animations ====== */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ====== Responsive Design ====== */
+@media (max-width: 1024px) {
+  h1 {
+    font-size: 2.75rem;
+  }
+  
+  h2 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .premium-header {
+    padding: var(--space-md);
+  }
+  
+  .nav-links {
+    display: none;
+  }
+  
+  .logo-text {
+    font-size: 1.25rem;
+  }
+  
+  .auth-buttons {
+    gap: var(--space-sm);
+  }
+  
+  .btn {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.9rem;
+  }
+  
+  .section {
+    padding: var(--space-xl) 0;
+  }
+  
+  h1 {
+    font-size: 2.25rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+  
+  .footer-about {
+    max-width: 100%;
+  }
+}
+  </style>
 
   <!-- Base path for routing -->
   <base href="/" />
@@ -32,21 +572,91 @@
 
 <body>
   <!-- Browser warning fallback -->
-  <noscript>
-    <div class="alert alert-warning text-center m-4">
-      ⚠️ This app requires JavaScript to function properly.
+ 
+  <!-- Premium Header -->
+  <header class="premium-header">
+    <div class="header-container">
+      <a href="/" class="logo">
+        <i class="fas fa-brain logo-icon"></i>
+        <span class="logo-text">EchoSoul</span>
+      </a>
+      
+      <nav class="nav-links">
+        <a href="/memories" class="nav-link">Memories</a>
+        <a href="/discover" class="nav-link">Discover</a>
+        <a href="/about" class="nav-link">About</a>
+        <a href="/pricing" class="nav-link">Pricing</a>
+      </nav>   
+      
     </div>
-  </noscript>
-
-  <div class="browser-warning text-center text-danger fw-bold p-2 bg-light border-bottom">
-    ⚠️ If this page appears broken, try reloading. If the problem persists, use Chrome or Firefox.
-  </div>
+  </header>
 
   <!-- React mounts here -->
   <div id="root"></div>
 
+  <!-- Premium Footer -->
+  <footer class="premium-footer">
+    <div class="footer-container">
+      <div class="footer-about">
+        <div class="footer-logo">
+          <i class="fas fa-brain footer-logo-icon"></i>
+          <span class="footer-logo-text">EchoSoul</span>
+        </div>
+        <p>Preserve your digital memories and connect with your digital self. Powered by AI and blockchain technology.</p>
+        <div class="footer-social">          
+          <a href="#"><i class="fab fa-discord social-icon"></i></a>
+          <a href="https://github.com/WanjalaDavis"><i class="fab fa-github social-icon"></i></a>
+          <a href="#"><i class="fab fa-linkedin social-icon"></i></a>
+        </div>
+      </div>
+      
+      <div class="footer-links">
+        <h3>Product</h3>
+        <ul>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">API</a></li>
+          <li><a href="#">Integrations</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-links">
+        <h3>Company</h3>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-links">
+        <h3>Legal</h3>
+        <ul>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Cookie Policy</a></li>         
+        </ul>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      &copy; 2025 EchoSoul. All rights reserved. Built on the Internet Computer Protocol.
+    </div>
+  </footer>
+
   <!-- Main JS -->
   <script type="module" src="/src/main.jsx"></script>
+  
+  <script>
+    // Show browser warning for non-Chrome/Firefox browsers
+    const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+    const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    
+    if (!isFirefox && !isChrome) {
+      document.querySelector('.browser-warning').style.display = 'block';
+    }
+  </script>
 </body>
 
 </html>

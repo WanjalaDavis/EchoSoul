@@ -19,6 +19,8 @@ actor EchoSoul {
     timestamp: Int;
     tags: [Text];
     emotion: ?Text;
+    imageUrl: ?Text;
+    audioUrl: ?Text;
   };
 
   type UserProfile = {
@@ -43,6 +45,7 @@ actor EchoSoul {
   stable var users: [(Principal, User)] = [];
   stable var memoryCounter: Nat = 0;
   stable var userMemories: [(Principal, [Memory])] = [];
+  stable var usernameIndex: [(Text, Principal)] = [];
 
   // ===== Runtime State =====
   let userMap = HashMap.fromIter<Principal, User>(
@@ -53,9 +56,13 @@ actor EchoSoul {
     userMemories.vals(), 10, Principal.equal, Principal.hash
   );
 
-  // ===== Helper Functions =====
+  let usernameMap = HashMap.fromIter<Text, Principal>(
+    usernameIndex.vals(), 10, Text.equal, Text.hash
+  );
+
+  // ===== Helper: Add item if not exists =====
   func addUnique(array: [Principal], item: Principal): [Principal] {
-    let found = Array.find<Principal>(array, func(p: Principal) {
+    let found = Array.find<Principal>(array, func(p) {
       Principal.equal(p, item)
     });
     switch (found) {
@@ -67,30 +74,23 @@ actor EchoSoul {
   // ===== Core Features =====
   public shared({ caller }) func registerUser(username: Text, bio: Text, avatar: ?Text): async Result {
     let trimmedUsername = Text.trim(username, #text " ");
+    let lowerUsername = Text.toLowercase(trimmedUsername);
 
     if (Text.size(trimmedUsername) < 3 or Text.size(trimmedUsername) > 20) {
-      return #err("Username must be 3-20 characters (after trimming spaces).");
+      return #err("Username must be 3-20 characters.");
     };
 
     if (Text.contains(trimmedUsername, #text " ")) {
       return #err("Username cannot contain spaces.");
     };
 
-    // Ensure username uniqueness
-    let entries = Iter.toArray(userMap.entries());
-    let exists = Array.find<(Principal, User)>(
-      entries,
-      func((_, u)) {
-        Text.toLowercase(u.profile.username) == Text.toLowercase(trimmedUsername)
-      }
-    );
-
-    if (Option.isSome(exists)) {
-      return #err("Username already exists. Please choose another one.");
-    };
-
     if (Text.size(bio) < 10 or Text.size(bio) > 500) {
       return #err("Bio must be 10-500 characters.");
+    };
+
+    // Ensure username is unique
+    if (usernameMap.get(lowerUsername) != null) {
+      return #err("Username already exists.");
     };
 
     let newUser: User = {
@@ -106,6 +106,7 @@ actor EchoSoul {
 
     userMap.put(caller, newUser);
     memoryMap.put(caller, []);
+    usernameMap.put(lowerUsername, caller);
 
     return #ok("Profile created successfully");
   };
@@ -113,10 +114,12 @@ actor EchoSoul {
   public shared({ caller }) func addMemory(
     text: Text,
     tags: [Text],
-    emotion: ?Text
+    emotion: ?Text,
+    imageUrl: ?Text,
+    audioUrl: ?Text
   ): async Memory {
     if (Text.size(text) < 5 or Text.size(text) > 1000) {
-      throw Error.reject("Memory text must be 5-1000 characters.");
+      throw Error.reject("Memory must be 5-1000 characters.");
     };
 
     let memory: Memory = {
@@ -125,6 +128,8 @@ actor EchoSoul {
       timestamp = Time.now();
       tags = Array.filter<Text>(tags, func(t) { Text.size(t) > 0 });
       emotion;
+      imageUrl;
+      audioUrl;
     };
 
     memoryCounter += 1;
@@ -135,7 +140,7 @@ actor EchoSoul {
     return memory;
   };
 
-  // ===== AI Feature: Memory Summary =====
+  // ===== AI Summary (stub) =====
   public query func generateMemorySummary(principal: Principal): async ?Text {
     let memories = Option.get(memoryMap.get(principal), []);
     if (memories.size() == 0) return null;
@@ -145,7 +150,7 @@ actor EchoSoul {
     return ?summary;
   };
 
-  // ===== Social Features =====
+  // ===== Social Connections =====
   public shared({ caller }) func connectWith(other: Principal): async Text {
     if (Principal.equal(caller, other)) {
       return "Cannot connect with yourself.";
@@ -163,6 +168,7 @@ actor EchoSoul {
         let updatedUser2 = {
           user2 with connections = addUnique(user2.connections, caller)
         };
+
         userMap.put(caller, updatedUser1);
         userMap.put(other, updatedUser2);
 
@@ -200,9 +206,7 @@ actor EchoSoul {
     let entries = Iter.toArray(userMap.entries());
     Array.map<(Principal, User), (Principal, UserProfile)>(
       entries,
-      func((p, u)) {
-        (p, u.profile)
-      }
+      func((p, u)) = (p, u.profile)
     );
   };
 
@@ -214,19 +218,15 @@ actor EchoSoul {
   };
 
   public query func getUserByUsername(username: Text): async ?(Principal, UserProfile) {
-    let entries = Iter.toArray(userMap.entries());
-    let found = Array.find<(Principal, User)>(
-      entries,
-      func((p, u)) {
-        Text.toLowercase(u.profile.username) == Text.toLowercase(username)
-      }
-    );
-    switch (found) {
-      case (?entry) {
-        let (principal, user) = entry;
-        return ?(principal, user.profile);
+    let lower = Text.toLowercase(username);
+    switch (usernameMap.get(lower)) {
+      case (?p) {
+        switch (userMap.get(p)) {
+          case (?u) return ?(p, u.profile);
+          case _ return null;
+        };
       };
-      case null return null;
+      case _ return null;
     };
   };
 
@@ -239,10 +239,12 @@ actor EchoSoul {
   system func preupgrade() {
     users := Iter.toArray(userMap.entries());
     userMemories := Iter.toArray(memoryMap.entries());
+    usernameIndex := Iter.toArray(usernameMap.entries());
   };
 
   system func postupgrade() {
     users := [];
     userMemories := [];
+    usernameIndex := [];
   };
 };

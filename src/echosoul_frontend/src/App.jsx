@@ -6,7 +6,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { chatWithGPT } from "./api/openai";
 
+import { UploadButton, UploadDropzone } from "@uploadthing/react";
+import { createUploadthing } from "@uploadthing/react";
+
 import "./index.scss";
+
 
 const App = () => {
   const [authClient, setAuthClient] = useState(null);
@@ -23,12 +27,15 @@ const App = () => {
     isRegistered: false
   });
 
-  // Memory state
-  const [memory, setMemory] = useState({
-    text: "",
-    tags: "",
-    emotion: ""
-  });
+      // Memory state
+      const [memory, setMemory] = useState({
+        text: "",
+        tags: "",
+        emotion: "",
+        imageUrl: "",
+        audioUrl: ""
+      });
+
 
   // App data
   const [memories, setMemories] = useState([]);
@@ -205,14 +212,14 @@ const handleUsernameLogin = async () => {
 const newMemory = await echosoul_backend.addMemory(
   trimmedText,
   tags,
-  memory.emotion ? [memory.emotion] : []
+  memory.emotion ? [memory.emotion] : [],
+  memory.imageUrl ? [memory.imageUrl] : [],
+  memory.audioUrl ? [memory.audioUrl] : []
 );
 
-
-
-      
+    
       setMemories(prev => [newMemory, ...prev]);
-      setMemory({ text: "", tags: "", emotion: "" });
+      setMemory({ text: "", tags: "", emotion: "", imageUrl: "", audioUrl: "" });
     } catch (error) {
       console.error("Error adding memory:", error);
       setError("Failed to add memory. Please try again.");
@@ -295,7 +302,7 @@ const chatWithEchoSoul = async () => {
     ];
 
     // 🤖 Call GPT via openai.js (which handles memory summary)
-    const responseText = await chatWithGPT(messages);
+    const responseText = await chatWithGPT(messages); // no principal passed
 
     const botMessage = {
       sender: "bot",
@@ -337,8 +344,7 @@ const chatWithEchoSoul = async () => {
     <div className="app-container">
       {/* Header */}
       <header className="app-header">
-        <div className="brand">
-          <h1><i className="fas fa-brain"></i> EchoSoul</h1>
+        <div className="brand">          
           <p>Preserving your digital consciousness</p>
         </div>
         <div className="user-info">
@@ -535,6 +541,22 @@ const chatWithEchoSoul = async () => {
                             )}
                           </div>
                           <p className="memory-text">{m.text}</p>
+
+
+                         {m.imageUrl && (
+                        <div className="memory-media">
+                          <img src={m.imageUrl} alt="Memory" className="memory-image" />
+                        </div>
+                      )}
+
+                      {m.audioUrl && (
+                        <div className="memory-media">
+                          <audio controls src={m.audioUrl}></audio>
+                        </div>
+                      )}
+
+
+
                           {m.tags.length > 0 && (
                             <div className="memory-tags">
                               {m.tags.map((tag, i) => (
@@ -595,7 +617,37 @@ const chatWithEchoSoul = async () => {
                           <option value="🤔 Thoughtful">🤔 Thoughtful</option>
                           <option value="💡 Idea">💡 Idea</option>
                           <option value="🏥 Health">🏥 Health</option>
-                        </select>
+                        </select>                         
+                          </div>
+                          </div> {/* <== THIS is already in your code. Add BELOW it: */}
+
+                         <div className="form-row">
+                      <div className="form-group half-width">
+                        <label><i className="fas fa-image"></i> Upload Image (optional)</label>
+                        <UploadDropzone
+                          endpoint="memoryUploader"
+                          onClientUploadComplete={(res) => {
+                            setMemory(prev => ({ ...prev, imageUrl: res[0].url }));
+                          }}
+                          onUploadError={(err) => setError(`Upload failed: ${err.message}`)}
+                          maxSize={5 * 1024 * 1024} // 5MB
+                          acceptedFileTypes={["image/png", "image/jpeg"]}
+                        />
+                      </div>
+                      <div className="form-group half-width">
+                        <label><i className="fas fa-microphone"></i> Upload Audio/Video (optional)</label>
+                        <UploadDropzone
+                          endpoint="memoryUploader"
+                          onClientUploadComplete={(res) => {
+                            setMemory(prev => ({ ...prev, audioUrl: res[0].url }));
+                          }}
+                          onUploadError={(err) => setError(`Upload failed: ${err.message}`)}
+                          maxSize={10 * 1024 * 1024} // 10MB
+                          acceptedFileTypes={["audio/mpeg", "audio/wav", "video/mp4"]}
+                        />
+                      </div>
+                          
+
                       </div>
                     </div>
                     <button 
@@ -614,7 +666,7 @@ const chatWithEchoSoul = async () => {
                       )}
                     </button>
                   </div>
-                </div>
+                
               )}
 
               {activeTab === "connect" && (
@@ -735,11 +787,8 @@ const chatWithEchoSoul = async () => {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="app-footer">
-        <p>EchoSoul - Preserving your digital consciousness</p>
-        <p className="copyright">© {new Date().getFullYear()} All rights reserved</p>
-      </footer>
+  
+
 
       {/* Loading Overlay */}
       {loading && (
