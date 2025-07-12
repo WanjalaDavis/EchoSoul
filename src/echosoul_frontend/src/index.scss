@@ -1140,3 +1140,16 @@ textarea {
 .hover-grow:hover {
   transform: scale(1.05);
 }
+.mic-btn {
+  background-color: #6e48aa;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  margin-right: 5px;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.mic-btn:hover {
+  background-color: #4a2d7a;
+}

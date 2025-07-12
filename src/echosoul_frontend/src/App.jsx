@@ -5,6 +5,8 @@ import { AuthClient } from "@dfinity/auth-client";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { chatWithGPT } from "./api/openai";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import axios from "axios";
 
 import { UploadButton, UploadDropzone } from "@uploadthing/react";
 import { createUploadthing } from "@uploadthing/react";
@@ -18,6 +20,9 @@ const App = () => {
   const [activeTab, setActiveTab] = useState("memories");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [imagePrompt, setImagePrompt] = useState("");
+  const [generatedImageUrl, setGeneratedImageUrl] = useState("");
+
 
   // User state
   const [user, setUser] = useState({
@@ -45,6 +50,35 @@ const App = () => {
   const [summary, setSummary] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
+
+    const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
+
+
+  const handleVoiceInput = () => {
+  if (!browserSupportsSpeechRecognition) {
+    setError("Your browser does not support speech recognition.");
+    return;
+  }
+
+  resetTranscript();
+  SpeechRecognition.startListening({ continuous: false, language: "en-US" });
+
+  setTimeout(() => {
+    SpeechRecognition.stopListening();
+    if (transcript.trim()) {
+      setChatInput(transcript.trim());
+    } else {
+      setError("Didn't catch that. Try speaking louder.");
+    }
+  }, 5000); // Listen for 5 seconds
+};
+
+
 
   useEffect(() => {
     const initAuth = async () => {
@@ -320,6 +354,33 @@ const chatWithEchoSoul = async () => {
 };
 
 
+const generateImageFromPrompt = async () => {
+  if (!imagePrompt.trim()) {
+    setError("Please describe what you want to generate.");
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+
+  try {
+    const res = await axios.post("http://localhost:3001/api/image", { prompt: imagePrompt });
+    const url = res.data.imageUrl;
+
+    if (url) {
+      setGeneratedImageUrl(url);
+    } else {
+      setError("Image generation failed. Try again.");
+    }
+  } catch (error) {
+    console.error("Image generation error:", error);
+    setError("Server error during image generation.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   if (!authClient) return <div className="loading-screen">Initializing...</div>;
 
   if (!principal) {
@@ -483,6 +544,15 @@ const chatWithEchoSoul = async () => {
               >
                 <i className="fas fa-comment-dots"></i> Chat
               </button>
+
+              <button
+              className={activeTab === "image" ? "active" : ""}
+              onClick={() => setActiveTab("image")}
+            >
+              <i className="fas fa-image"></i> Generate Image
+            </button>
+
+
             </nav>
 
             {/* Error Message */}
@@ -490,6 +560,49 @@ const chatWithEchoSoul = async () => {
 
             {/* Tab Content */}
             <div className="tab-content">
+
+
+                              {activeTab === "image" && (
+                  <div className="image-tab">
+                    <h2><i className="fas fa-image"></i> Generate Image from Prompt</h2>
+                    
+                    <div className="form-group">
+                      <label><i className="fas fa-pencil-alt"></i> Describe the image</label>
+                      <input
+                        type="text"
+                        value={imagePrompt}
+                        onChange={(e) => setImagePrompt(e.target.value)}
+                        placeholder="e.g., a futuristic city with flying cars"
+                      />
+                    </div>
+
+                    <button 
+                      onClick={generateImageFromPrompt} 
+                      className="primary-btn"
+                      disabled={loading || !imagePrompt.trim()}
+                    >
+                      {loading ? (
+                        <>
+                          <i className="fas fa-spinner fa-spin"></i> Generating...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-magic"></i> Generate Image
+                        </>
+                      )}
+                    </button>
+
+                    {generatedImageUrl && (
+                      <div className="generated-image-container">
+                        <h4><i className="fas fa-eye"></i> Result</h4>
+                        <img src={generatedImageUrl} alt="Generated" style={{ maxWidth: "100%", marginTop: "1rem" }} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+
+
               {activeTab === "memories" && (
                 <div className="memories-tab">
                   {summary && (
@@ -759,25 +872,35 @@ const chatWithEchoSoul = async () => {
                       )}
                     </div>
                     <div className="chat-input-container">
-                      <input
-                        type="text"
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        placeholder="Ask your EchoSoul something..."
-                        onKeyPress={(e) => e.key === "Enter" && chatWithEchoSoul()}
-                        disabled={loading}
-                      />
-                      <button 
-                        onClick={chatWithEchoSoul} 
-                        disabled={loading || !chatInput.trim()}
-                        className="send-btn"
-                      >
-                        {loading ? (
-                          <i className="fas fa-spinner fa-spin"></i>
-                        ) : (
-                          <i className="fas fa-paper-plane"></i>
-                        )}
-                      </button>
+                       <input
+                          type="text"
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          placeholder="Ask your EchoSoul something..."
+                          onKeyPress={(e) => e.key === "Enter" && chatWithEchoSoul()}
+                          disabled={loading}
+                        />
+
+                        <button
+                          onClick={handleVoiceInput}
+                          className="mic-btn"
+                          title="Speak to EchoSoul"
+                        >
+                          <i className={`fas ${listening ? "fa-microphone" : "fa-microphone-slash"}`}></i>
+                        </button>
+
+                        <button
+                          onClick={chatWithEchoSoul}
+                          disabled={loading || !chatInput.trim()}
+                          className="send-btn"
+                        >
+                          {loading ? (
+                            <i className="fas fa-spinner fa-spin"></i>
+                          ) : (
+                            <i className="fas fa-paper-plane"></i>
+                          )}
+                        </button>
+
                     </div>
                   </div>
                 </div>

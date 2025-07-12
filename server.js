@@ -4,14 +4,13 @@ import bodyParser from "body-parser";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 
-// ✅ Load .env variables
 dotenv.config();
-
 const app = express();
 const PORT = 3001;
 
-// ✅ Get API Key from environment
+// ====== Load API Keys ======
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const IMAGE_API_KEY = process.env.IMAGE_API_KEY; // For DeepAI or similar
 
 if (!OPENROUTER_API_KEY) {
   console.warn("⚠️ Missing OPENROUTER_API_KEY in .env. AI chat won't work.");
@@ -26,21 +25,14 @@ app.use(bodyParser.json());
 // ====== System Prompt ======
 const systemPrompt = `
 You are EchoSoul, a personal AI companion that helps users reflect on their thoughts and emotions.
-
 You don't have access to user memories — rely only on the current conversation to guide your responses.
-
 Be empathetic, brief, and insightful.
-
-If you don’t have enough context to answer, say:
-"I’m still learning about you. Could you tell me more?"
+If you don’t have enough context to answer, say: "I’m still learning about you. Could you tell me more?"
 `.trim();
 
 // ====== Chat Endpoint ======
 app.post("/api/chat", async (req, res) => {
   const { messages } = req.body;
-
-  console.log("🧠 Incoming messages:", messages);
-
   const fullMessages = [
     { role: "system", content: systemPrompt },
     ...messages,
@@ -54,31 +46,66 @@ app.post("/api/chat", async (req, res) => {
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3-8b-instruct", // ✅ Free model
+        model: "meta-llama/llama-3-8b-instruct",
         messages: fullMessages,
         temperature: 0.7,
       }),
     });
 
     const data = await response.json();
-    console.log("🔍 OpenRouter response:", data);
-
-    if (data?.error) {
-      console.error("❌ API Error:", data.error.message);
-      return res.status(500).json({ error: data.error.message });
-    }
-
-    if (!data.choices || !data.choices[0]?.message?.content) {
+    if (!data.choices?.[0]?.message?.content) {
       return res.status(500).json({ error: "Invalid response from OpenRouter." });
     }
 
-    const reply = data.choices[0].message.content.trim();
-    res.json({ reply });
-
+    res.json({ reply: data.choices[0].message.content.trim() });
   } catch (error) {
     console.error("🔥 OpenRouter fetch error:", error);
     res.status(500).json({ error: "Server failed to fetch AI response." });
   }
+});
+
+// ====== Image Generation ======
+app.post("/api/generate-image", async (req, res) => {
+  const { prompt } = req.body;
+
+  try {
+    const response = await fetch("https://api.deepai.org/api/text2img", {
+      method: "POST",
+      headers: {
+        "Api-Key": IMAGE_API_KEY,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ text: prompt }),
+    });
+
+    const data = await response.json();
+    if (!data.output_url) throw new Error("No image URL returned");
+    res.json({ imageUrl: data.output_url });
+  } catch (error) {
+    console.error("🖼️ Image generation error:", error.message);
+    res.status(500).json({ error: "Failed to generate image" });
+  }
+});
+
+// ====== Online Search ======
+app.post("/api/search", async (req, res) => {
+  const { query } = req.body;
+  try {
+    const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`);
+    const data = await response.json();
+    const answer = data.AbstractText || data.RelatedTopics?.[0]?.Text || "No result found.";
+    res.json({ answer });
+  } catch (err) {
+    console.error("🌐 Search error:", err);
+    res.status(500).json({ error: "Search failed" });
+  }
+});
+
+// ====== (Optional) Voice Recognition Transcription ======
+// For use with Whisper or Google STT (you can add actual implementation here)
+app.post("/api/transcribe", async (req, res) => {
+  // TODO: Add actual voice transcription (file upload + API call)
+  return res.status(501).json({ error: "Voice transcription not implemented on backend. Use browser voice input instead." });
 });
 
 // ====== Start Server ======
