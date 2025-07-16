@@ -8,9 +8,8 @@ dotenv.config();
 const app = express();
 const PORT = 3001;
 
-// ====== Load API Keys ======
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const IMAGE_API_KEY = process.env.IMAGE_API_KEY; // For DeepAI or similar
+const IMAGE_API_KEY = process.env.IMAGE_API_KEY; 
 
 if (!OPENROUTER_API_KEY) {
   console.warn("⚠️ Missing OPENROUTER_API_KEY in .env. AI chat won't work.");
@@ -64,7 +63,7 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-// ====== Image Generation ======
+
 app.post("/api/generate-image", async (req, res) => {
   const { prompt } = req.body;
 
@@ -87,7 +86,7 @@ app.post("/api/generate-image", async (req, res) => {
   }
 });
 
-// ====== Online Search ======
+
 app.post("/api/search", async (req, res) => {
   const { query } = req.body;
   try {
@@ -101,14 +100,13 @@ app.post("/api/search", async (req, res) => {
   }
 });
 
-// ====== (Optional) Voice Recognition Transcription ======
-// For use with Whisper or Google STT (you can add actual implementation here)
+
 app.post("/api/transcribe", async (req, res) => {
   // TODO: Add actual voice transcription (file upload + API call)
   return res.status(501).json({ error: "Voice transcription not implemented on backend. Use browser voice input instead." });
 });
 
-// ====== Start Server ======
+
 app.listen(PORT, () => {
   console.log(`✅ EchoSoul AI server running at http://localhost:${PORT}`);
 });
