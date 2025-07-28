@@ -284,7 +284,7 @@ const newMemory = await echosoul_backend.addMemory(
     }
   };
 
-        const connectWithUser = async (otherPrincipal) => {
+  const connectWithUser = async (otherPrincipal) => {
   console.log("Attempting to connect with:", otherPrincipal); // Debug log
   
   if (!otherPrincipal || typeof otherPrincipal !== "string") {
@@ -732,7 +732,7 @@ const generateImageFromPrompt = async () => {
                           <option value="🏥 Health">🏥 Health</option>
                         </select>                         
                           </div>
-                          </div> {/* <== THIS is already in your code. Add BELOW it: */}
+                          </div> 
 
                          <div className="form-row">
                       <div className="form-group half-width">
@@ -908,9 +908,7 @@ const generateImageFromPrompt = async () => {
             </div>
           </>
         )}
-      </main>
-
-  
+      </main> 
 
 
       {/* Loading Overlay */}
